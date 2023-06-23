@@ -32,10 +32,30 @@ export function createArticle(data) {
   })
 }
 
+// 修改文章
 export function updateArticle(data) {
   return request({
-    url: '/vue-element-admin/article/update',
+    url: '/api/article/update',
     method: 'post',
     data
   })
 }
+// 返回用户的草稿
+export function fetchDraftsByName(username) {
+  return request({
+    url: '/api/article/fetchDraftsByName',
+    method: 'get',
+    params: { username }
+  })
+}
+
+// 返回用户的已发布文章列表
+export function getList(name, sort) {
+  console.log('传去后端的nickname', name)
+  return request({
+    url: '/api/article/listByName',
+    method: 'get',
+    params: { name, sort }
+  })
+}
+

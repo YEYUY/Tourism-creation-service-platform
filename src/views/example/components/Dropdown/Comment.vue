@@ -4,14 +4,14 @@
       {{ !comment_disabled?'Comment: opened':'Comment: closed' }}
       <i class="el-icon-caret-bottom el-icon--right" />
     </el-button>
-    <el-dropdown-menu slot="dropdown" class="no-padding">
+    <el-dropdown-menu slot="dropdown" class="no-padding" style="color:black;">
       <el-dropdown-item>
-        <el-radio-group v-model="comment_disabled" style="padding: 10px;">
+        <el-radio-group v-model="comment_disabled" style="padding: 10px;color:black;">
           <el-radio :label="true">
-            Close comment
+            关闭评论功能
           </el-radio>
           <el-radio :label="false">
-            Open comment
+            打开评论功能
           </el-radio>
         </el-radio-group>
       </el-dropdown-item>

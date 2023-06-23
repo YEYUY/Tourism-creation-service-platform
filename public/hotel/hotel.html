@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>酒店查询</title>
+  <a href="http://localhost:9527/#/home">
+    <button class="button" style="vertical-align:middle"><span>返回首页</span></button>
+  </a>
+</head>
+
+<body background="https://k1img.06dn.com/y/60/2023/05/06/60_6456035754076.png"
+style="background-repeat:no-repeat;
+background-attachment:fixed;
+background-size:100% 100%; ">
+  <h1>酒店查询</h1>
+  <form>
+    <label>所在城市：</label>
+    <input type="text" id="location" required/>
+    <label>酒店名称：</label>
+    <input type="text" id="hotelname" required/>
+    <label>订购日期：</label>
+    <input type="date" id="bookdate" required/>
+    <label>酒店类型：</label>
+    <select id="hoteltype">
+      <option value="economy">快捷酒店</option>
+      <option value="business">商务酒店</option>
+      <option value="vocation">度假酒店</option>
+      <option value="apartment">公寓酒店</option>
+    </select>
+    <button type="submit">查询</button>
+  </form>
+  <br>
+  <table id="hotelTable" border="1">
+    <thead>
+      <tr>
+        <th>酒店名称</th>
+        <th>酒店地址</th>
+        <th>所在城市</th>
+        <th>订购日期</th>
+        <th>酒店类型</th>
+        <th>价格</th>
+      </tr>
+    </thead>
+    <tbody id="hotelTableBody">
+    </tbody>
+  </table>
+
+  
+  <script type="text/javascript">
+const form = document.querySelector('form');
+const tableBody = document.querySelector('#hotelTableBody');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  
+  const location = document.querySelector('#location').value;
+  const hotelname = document.querySelector('#hotelname').value;
+  const bookdate = document.querySelector('#bookdate').value;
+  const hoteltype = document.querySelector('#hoteltype').value;
+  
+  let response;
+  try {
+    response = await fetch('http://127.0.0.1:8090/api/hotel/queryHotel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ location,hotelname,bookdate,hoteltype })
+    });
+  } catch (error) {
+    console.error('Fetch Error:', error);
+  }
+
+  if (response) {
+    var data = await response.json();
+    data = data.data;
+    tableBody.innerHTML = '';
+    console.log(data);
+    data.data.forEach(hotel => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${hotel.hotelname}</td>
+        <td>${hotel.address}</td>
+        <td>${hotel.location}</td>
+        <td>${hotel.bookdate}</td>
+        <td>${hotel.hoteltype}</td>
+        <td>${hotel.price}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+});
+
+</script>
+
+</body>
+</html>

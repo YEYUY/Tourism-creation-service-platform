@@ -1,13 +1,13 @@
 <template>
   <el-form>
-    <el-form-item label="Name">
-      <el-input v-model.trim="user.name" />
+    <el-form-item label="用户名">
+      <el-input v-model.trim="user.username" disabled />
     </el-form-item>
-    <el-form-item label="Email">
-      <el-input v-model.trim="user.email" />
+    <el-form-item label="昵称">
+      <el-input v-model.trim="user.nickname" disabled />
     </el-form-item>
-    <el-form-item>
-      <el-button type="primary" @click="submit">Update</el-button>
+    <el-form-item label="电话">
+      <el-input v-model.trim="user.phone" disabled />
     </el-form-item>
   </el-form>
 </template>
@@ -26,13 +26,6 @@ export default {
     }
   },
   methods: {
-    submit() {
-      this.$message({
-        message: 'User information has been updated successfully',
-        type: 'success',
-        duration: 5 * 1000
-      })
-    }
   }
 }
 </script>

@@ -1,100 +1,87 @@
 <template>
   <div class="user-activity">
-    <div class="post">
-      <div class="user-block">
-        <img class="img-circle" :src="'https://wpimg.wallstcn.com/57ed425a-c71e-4201-9428-68760c0537c4.jpg'+avatarPrefix">
-        <span class="username text-muted">Iron Man</span>
-        <span class="description">Shared publicly - 7:30 PM today</span>
+    <el-empty v-if="articleList===undefined ||articleList.length===0 " description="您的游箱空空如也，快来补充吧...." />
+    <div v-for="article in articleList" :key="article.id" class="post">
+      <!-- 背景图片-->
+      <div class="image">
+        <span style="width:inherit;position:absolute;text-align:right;padding:20px 40px;color:white">
+          <h1 style="display:inline;font-size:40px;font-weight:500">{{ article.region }}/</h1>
+          <h2 style="display:inline">{{ article.createtime.substr(5,2) }}月</h2>
+        </span>
+        <img :src="article.cover" style="width: 100%;height:100%;object-fit: cover;border-radius:10px">
       </div>
-      <p>
-        Lorem ipsum represents a long-held tradition for designers,
-        typographers and the like. Some people hate it and argue for
-        its demise, but others ignore the hate as they create awesome
-        tools to help create filler text for everyone from bacon lovers
-        to Charlie Sheen fans.
-      </p>
-      <ul class="list-inline">
-        <li>
-          <span class="link-black text-sm">
-            <i class="el-icon-share" />
-            Share
-          </span>
-        </li>
-        <li>
-          <span class="link-black text-sm">
-            <svg-icon icon-class="like" />
-            Like
-          </span>
-        </li>
-      </ul>
-    </div>
-    <div class="post">
-      <div class="user-block">
-        <img class="img-circle" :src="'https://wpimg.wallstcn.com/9e2a5d0a-bd5b-457f-ac8e-86554616c87b.jpg'+avatarPrefix">
-        <span class="username text-muted">Captain American</span>
-        <span class="description">Sent you a message - yesterday</span>
+      <!-- 主体 -->
+      <div class="post-body">
+        <!-- 标题 -->
+        <div class="post-title">
+          <el-button class="button1" type="text" @click="toDisplay(article.id)">{{ article.title }}</el-button>
+        </div>
+        <!-- 小部件 -->
+        <div class="widget">
+          <i class="el-icon-view" />
+          <span class="widget-span">{{ article.readings }}</span>
+          <span class="widget-span">{{ article.createtime }}</span>
+        </div>
+        <!-- 正文截取100字 -->
+        <p v-html="filterContent(article.content)" />
       </div>
-      <p>
-        Lorem ipsum represents a long-held tradition for designers,
-        typographers and the like. Some people hate it and argue for
-        its demise, but others ignore the hate as they create awesome
-        tools to help create filler text for everyone from bacon lovers
-        to Charlie Sheen fans.
-      </p>
-      <ul class="list-inline">
-        <li>
-          <span class="link-black text-sm">
-            <i class="el-icon-share" />
-            Share
-          </span>
-        </li>
-        <li>
-          <span class="link-black text-sm">
-            <svg-icon icon-class="like" />
-            Like
-          </span>
-        </li>
-      </ul>
-    </div>
-    <div class="post">
-      <div class="user-block">
-        <img class="img-circle" :src="'https://wpimg.wallstcn.com/fb57f689-e1ab-443c-af12-8d4066e202e2.jpg'+avatarPrefix">
-        <span class="username">Spider Man</span>
-        <span class="description">Posted 4 photos - 2 days ago</span>
-      </div>
-      <div class="user-images">
-        <el-carousel :interval="6000" type="card" height="220px">
-          <el-carousel-item v-for="item in carouselImages" :key="item">
-            <img :src="item+carouselPrefix" class="image">
-          </el-carousel-item>
-        </el-carousel>
-      </div>
-      <ul class="list-inline">
-        <li><span class="link-black text-sm"><i class="el-icon-share" /> Share</span></li>
-        <li>
-          <span class="link-black text-sm">
-            <svg-icon icon-class="like" /> Like</span>
-        </li>
-      </ul>
     </div>
   </div>
 </template>
 
 <script>
+import { getList } from '@/api/article'
+import { mapGetters } from 'vuex'
 const avatarPrefix = '?imageView2/1/w/80/h/80'
 const carouselPrefix = '?imageView2/2/h/440'
 
 export default {
+  computed: {
+    ...mapGetters([
+      'name',
+      'avatar',
+      'roles',
+      'introduction'
+    ])
+  },
+  created() {
+    this.getUser()
+    this.getArtList()
+  },
+  methods: {
+    toDisplay(idd) {
+      this.$router.push({ name: 'Display', params: { id: idd }})
+    },
+    filterContent(value) {
+      var reg = /<[^<>]+>/g
+      value = value.replace(reg, '') // 把v-html的格式标签替换掉
+      if (value.length > 120) {
+        return value.slice(0, 120) + '...'
+      } else {
+        return value
+      }
+    },
+    getUser() {
+      this.user = {
+        name: this.name,
+        role: this.roles.join(' | '),
+        email: 'admin@test.com',
+        avatar: this.avatar,
+        introduction: this.introduction
+      }
+      // console.log(this.user)
+    },
+    async getArtList() {
+      this.articleList = await getList(this.user.name, 'desc')
+      this.articleList = this.articleList.data
+      console.log(this.articleList)
+    }
+  },
   data() {
     return {
-      carouselImages: [
-        'https://wpimg.wallstcn.com/9679ffb0-9e0b-4451-9916-e21992218054.jpg',
-        'https://wpimg.wallstcn.com/bcce3734-0837-4b9f-9261-351ef384f75a.jpg',
-        'https://wpimg.wallstcn.com/d1d7b033-d75e-4cd6-ae39-fcd5f1c0a7c5.jpg',
-        'https://wpimg.wallstcn.com/50530061-851b-4ca5-9dc5-2fead928a939.jpg'
-      ],
-      avatarPrefix,
-      carouselPrefix
+      user: {},
+      articleList: []
+
     }
   }
 }
@@ -140,9 +127,21 @@ export default {
     padding-bottom: 15px;
     color: #666;
 
+    .post-body{
+      padding: 20px 20px 0;
+    }
+    .post-title{
+      .button1{
+        font-size: 18px;
+        font-weight: bold;
+        color:#6585ac
+      }
+    }
+
     .image {
       width: 100%;
-      height: 100%;
+      height: 300px;
+      border-radius: 30%;
 
     }
 
@@ -181,5 +180,9 @@ export default {
 
 .text-muted {
   color: #777;
+}
+.widget-span{
+  margin-left:5px;
+  margin-right:10px;
 }
 </style>

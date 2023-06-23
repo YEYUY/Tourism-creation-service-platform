@@ -49,6 +49,11 @@ export default {
     isCollapse() {
       return !this.sidebar.opened
     }
+  },
+  data() {
+    return {
+      showLogo: true
+    }
   }
 }
 </script>

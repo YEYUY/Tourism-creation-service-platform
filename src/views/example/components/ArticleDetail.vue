@@ -1,115 +1,182 @@
 <template>
   <div class="createPost-container">
     <el-form ref="postForm" :model="postForm" :rules="rules" class="form-container">
+      <div class="cover-container" style="position:ralative;">
+        <!-- 背景图片 -->
+        <img :src="postForm.cover" style="object-fit:cover;height:100%;width:100%;z-index:-1;">
+        <!-- 上传图片按钮 -->
+        <div v-if="!image_set" class="uploadImg" style="left:35%;margin-top:-350px;height:100px;width:600px;background-color:;z-index:2;position:absolute">
+          <span style="display:inline-block;width:25%;height:100%;vertical-align:top;">
+            <i class="el-icon-picture-outline-round" style="margin-left:25%;margin-top:12%;font-size:70px;color:#609889;" />
+            <el-button type="text" @click="dialogFormVisible = true">
+              <i class="el-icon-edit icon" style="" />
+            </el-button>
 
-      <sticky :z-index="10" :class-name="'sub-navbar '+postForm.status">
-        <CommentDropdown v-model="postForm.comment_disabled" />
-        <PlatformDropdown v-model="postForm.platforms" />
-        <SourceUrlDropdown v-model="postForm.source_uri" />
-        <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm">
-          Publish
-        </el-button>
-        <el-button v-loading="loading" type="warning" @click="draftForm">
-          Draft
-        </el-button>
-      </sticky>
+          </span>
+          <span style="display:inline-block;width:75%;height:100%;vertical-align:top;">
+            <h3 style="margin-top:25px;margin-bottom:5px">设置游记头图</h3>
+            <p>图片建议选择尺寸大于1680px的高清大图，如相机原图</p>
+          </span>
 
+        </div>
+        <!-- 标题输入框 -->
+        <div v-if="image_set" class="title-wrapper" style="margin-bottom: 40px;margin-top:-200px;">
+          <el-button type="text" @click="dialogFormVisible = true">
+            <i class="el-icon-edit icon" style="font-size:20px">编辑封面</i>
+          </el-button>
+          <el-form-item prop="title">
+
+            <el-input v-model="postForm.title" :maxlength="100" name="name" required placeholder="输入标题" />
+            <!-- <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
+              标题
+            </MDinput> -->
+          </el-form-item>
+        </div>
+
+        <div v-if="!image_set" class="title-wrapper" style="margin-bottom: 40px;margin-top:-130px;">
+          <el-form-item prop="title">
+            <el-input v-model="postForm.title" :maxlength="100" name="name" required placeholder="输入标题" />
+            <!-- <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
+              标题
+            </MDinput> -->
+          </el-form-item>
+        </div>
+
+      </div>
       <div class="createPost-main-container">
         <el-row>
-          <Warning />
-
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
-              <MDinput v-model="postForm.title" :maxlength="100" name="name" required>
-                Title
-              </MDinput>
-            </el-form-item>
-
             <div class="postInfo-container">
               <el-row>
-                <el-col :span="8">
-                  <el-form-item label-width="60px" label="Author:" class="postInfo-container-item">
-                    <el-select v-model="postForm.author" :remote-method="getRemoteUserList" filterable default-first-option remote placeholder="Search user">
-                      <el-option v-for="(item,index) in userListOptions" :key="item+index" :label="item" :value="item" />
-                    </el-select>
+                <!-- 话题标签填写 -->
+                <el-col :span="5">
+                  <i class="el-icon-s-flag" style="position:absolute;left:50px;top:8px;font-size:20px;color:#00809d" />
+                  <el-form-item label-width="120px" label="标签:" class="postInfo-container-item">
+                    <el-input v-model="postForm.tags" type="text" placeholder="输入话题/标签" />
+                  </el-form-item>
+                </el-col>
+                <!-- 区域填写 -->
+                <el-col :span="5">
+                  <i class="el-icon-location-outline" style="position:absolute;left:23%;top:8px;font-size:20px;color:#00809d" />
+                  <el-form-item label-width="120px" label="区域:" class="postInfo-container-item">
+                    <el-input v-model="postForm.region" type="text" placeholder="输入地区" />
                   </el-form-item>
                 </el-col>
 
-                <el-col :span="10">
-                  <el-form-item label-width="120px" label="Publish Time:" class="postInfo-container-item">
-                    <el-date-picker v-model="displayTime" type="datetime" format="yyyy-MM-dd HH:mm:ss" placeholder="Select date and time" />
-                  </el-form-item>
-                </el-col>
-
-                <el-col :span="6">
-                  <el-form-item label-width="90px" label="Importance:" class="postInfo-container-item">
-                    <el-rate
-                      v-model="postForm.importance"
-                      :max="3"
-                      :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                      :low-threshold="1"
-                      :high-threshold="3"
-                      style="display:inline-block"
+                <!-- 草稿选择 -->
+                <el-col :span="5">
+                  <i class="el-icon-document-copy" style="position:absolute;left:44%;top:8px;font-size:20px;color:#00809d" />
+                  <el-select v-model="postForm.id" clearable placeholder="选择恢复的草稿" style="margin-left:80px;" @change="selectDraft(postForm.id)">
+                    <!-- value是选后的值  label是显示的值 -->
+                    <el-option
+                      v-for="item in drafts"
+                      :key="item.value"
+                      :label="item.title"
+                      :value="item.id"
                     />
-                  </el-form-item>
+                  </el-select>
                 </el-col>
+
+                <!-- 发布文章选择 -->
+                <el-col :span="5">
+                  <i class="el-icon-collection" style="position:absolute;left:65%;top:8px;font-size:20px;color:#00809d" />
+                  <el-select v-model="postForm.id" clearable placeholder="选择已发布文章修改" style="margin-left:80px;" @change="selectDraft(postForm.id)">
+                    <!-- value是选后的值  label是显示的值 -->
+                    <el-option
+                      v-for="item in publicians"
+                      :key="item.value"
+                      :label="item.title"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-col>
+
+                <!-- 发布文章选择 -->
+                <el-col :span="4">
+                  <el-button v-if="postForm.status == 0" type="success">处于发布状态</el-button>
+
+                  <el-button v-if="postForm.status == 1" type="warning">处于草稿状态</el-button>
+
+                  <el-button v-if="postForm.status == 2" type="primary">处于编辑状态</el-button>
+                </el-col>
+
               </el-row>
             </div>
           </el-col>
         </el-row>
 
-        <el-form-item style="margin-bottom: 40px;" label-width="70px" label="Summary:">
-          <el-input v-model="postForm.content_short" :rows="1" type="textarea" class="article-textarea" autosize placeholder="Please enter the content" />
-          <span v-show="contentShortLength" class="word-counter">{{ contentShortLength }}words</span>
-        </el-form-item>
-
+        <aside>
+          温馨提示：处于发布状态的文章修改后仍是发布状态，处于草稿状态的文章发布后需要审核
+        </aside>
+        <!-- 集成文本编辑器 -->
         <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.content" :height="400" />
         </el-form-item>
 
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.image_uri" />
-        </el-form-item>
       </div>
     </el-form>
+
+    <el-row :gutter="20" style="height:100px">
+      <el-col :span="3" :offset="16">
+        <!-- 存草稿 -->
+        <el-button v-if="status!=0" type="warning" style="height:50px;width:150px;border-radius:20px" @click="save">存草稿箱</el-button>
+      </el-col>
+      <el-col :span="3" :offset="0">
+        <!-- 提交审核 -->
+        <el-button type="primary" style="height:50px;width:150px;border-radius:20px" @click="submit">提交审核</el-button>
+      </el-col>
+    </el-row>
+
+    <el-dialog title="封面链接上传" :visible.sync="dialogFormVisible">
+      <Warning />
+      <el-form :model="form">
+        <el-form-item label="图片链接:" :label-width="formLabelWidth">
+          <el-input v-model="form.img_uri" autocomplete="off" style="width:500px" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateImgUri">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Tinymce from '@/components/Tinymce'
-import Upload from '@/components/Upload/SingleImage3'
-import MDinput from '@/components/MDinput'
-import Sticky from '@/components/Sticky' // 粘性header组件
 import { validURL } from '@/utils/validate'
 import { fetchArticle } from '@/api/article'
 import { searchUser } from '@/api/remote-search'
 import Warning from './Warning'
-import { CommentDropdown, PlatformDropdown, SourceUrlDropdown } from './Dropdown'
+import requeest from '@/utils/request'
+import { mapGetters } from 'vuex'
+import { get } from '@/utils/request'
 
 const defaultForm = {
-  status: 'draft',
+  // 状态(0发布，1草稿，2删除，3待审核，4被拒)
+  status: 2,
   title: '', // 文章题目
-  content: '', // 文章内容
-  content_short: '', // 文章摘要
-  source_uri: '', // 文章外链
-  image_uri: '', // 文章图片
+  content: '<p>这是</p>\n<p>hhzheshi neitong aaa</p>', // 文章内容
+  region: '', // 区域
+  cover: 'https://pic1.zhimg.com/v2-780edcc54351725965dc76dd891a04f8_r.jpg', // 文章图片
   display_time: undefined, // 前台展示时间
   id: undefined,
-  platforms: ['a-platform'],
-  comment_disabled: false,
-  importance: 0
+  tasg: '',
+  author: ''
 }
 
 export default {
   name: 'ArticleDetail',
-  components: { Tinymce, MDinput, Upload, Sticky, Warning, CommentDropdown, PlatformDropdown, SourceUrlDropdown },
+  components: { Tinymce, Warning },
   props: {
-    isEdit: {
+    isEdit: { // 新建还是读取 ，父组件传值
       type: Boolean,
       default: false
     }
   },
+
   data() {
+    // 验证是否为空
     const validateRequire = (rule, value, callback) => {
       if (value === '') {
         this.$message({
@@ -121,61 +188,53 @@ export default {
         callback()
       }
     }
-    const validateSourceUri = (rule, value, callback) => {
-      if (value) {
-        if (validURL(value)) {
-          callback()
-        } else {
-          this.$message({
-            message: '外链url填写不正确',
-            type: 'error'
-          })
-          callback(new Error('外链url填写不正确'))
-        }
-      } else {
-        callback()
-      }
-    }
     return {
-      postForm: Object.assign({}, defaultForm),
+      id: undefined,
+      image_set: false,
+      dialogFormVisible: false,
+      postForm: Object.assign({}, defaultForm), // 复制初始表单
       loading: false,
-      userListOptions: [],
-      rules: {
-        image_uri: [{ validator: validateRequire }],
+      rules: { // 自定义验证方式
+        cover: [{ validator: validateRequire }, { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }],
         title: [{ validator: validateRequire }],
-        content: [{ validator: validateRequire }],
-        source_uri: [{ validator: validateSourceUri, trigger: 'blur' }]
+        region: [{ validator: validateRequire }],
+        content: [{ validator: validateRequire }]
       },
-      tempRoute: {}
+      form: {
+        img_uri: ''
+      },
+      drafts: [ // 草稿列表
+      ],
+      publicians: [ // 发布文章列表
+      ]
+
     }
   },
   computed: {
-    contentShortLength() {
-      return this.postForm.content_short.length
+    titleLength() {
+      return this.postForm.title.length
     },
     displayTime: {
-      // set and get is useful when the data
-      // returned by the back end api is different from the front end
-      // back end return => "2013-06-25 06:59:25"
-      // front end need timestamp => 1372114765000
       get() {
         return (+new Date(this.postForm.display_time))
       },
       set(val) {
         this.postForm.display_time = new Date(val)
       }
-    }
+    },
+    ...mapGetters([
+      'name'
+    ])
+
   },
   created() {
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id
       this.fetchData(id)
     }
-
-    // Why need to make a copy of this.$route here?
-    // Because if you enter this page and quickly switch tag, may be in the execution of the setTagsViewTitle function, this.$route is no longer pointing to the current page
-    // https://github.com/PanJiaChen/vue-element-admin/issues/1221
+    this.updateDrafts()
     this.tempRoute = Object.assign({}, this.$route)
+    this.updatePubs()
   },
   methods: {
     fetchData(id) {
@@ -204,56 +263,121 @@ export default {
       const title = 'Edit Article'
       document.title = `${title} - ${this.postForm.id}`
     },
-    submitForm() {
-      console.log(this.postForm)
+    save() { // 保存草稿
+      // console.log(this.postForm)
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$notify({
-            title: '成功',
-            message: '发布文章成功',
-            type: 'success',
-            duration: 2000
+          this.postForm.status = 1
+
+          this.postForm.author = this.name // 设置author字段
+          console.log(this.name)
+          requeest.post('/api/article/saveDraft', this.postForm).then(response => { // 拿到后端返回值
+            this.$notify({
+              title: '成功',
+              message: '文章成功保存至草稿箱',
+              type: 'success',
+              duration: 2000
+            })
           })
-          this.postForm.status = 'published'
           this.loading = false
         } else {
-          console.log('error submit!!')
+          console.log('保存草稿出错!!')
           return false
         }
-      })
+      }),
+      this.updateDrafts()
     },
-    draftForm() {
-      if (this.postForm.content.length === 0 || this.postForm.title.length === 0) {
-        this.$message({
-          message: '请填写必要的标题和内容',
-          type: 'warning'
-        })
-        return
-      }
-      this.$message({
-        message: '保存成功',
-        type: 'success',
-        showClose: true,
-        duration: 1000
-      })
-      this.postForm.status = 'draft'
+    submit() {
+      this.$refs.postForm.validate(valid => {
+        if (valid) {
+          this.loading = true
+          this.postForm.status = 3 // 待审核
+
+          this.postForm.author = this.name // 设置author字段
+          console.log(this.name)
+          requeest.post('/api/article/savePub', this.postForm).then(response => { // 拿到后端返回值
+            this.$notify({
+              title: '成功',
+              message: '文章成功提交审核',
+              type: 'success',
+              duration: 2000
+            })
+          })
+          this.loading = false
+        } else {
+          console.log('提交审核出错!!')
+          return false
+        }
+      }),
+      this.updatePubs()
     },
     getRemoteUserList(query) {
       searchUser(query).then(response => {
         if (!response.data.items) return
         this.userListOptions = response.data.items.map(v => v.name)
       })
+    },
+    updateImgUri() { // 更新上传的图片链接
+      this.postForm.cover = this.form.img_uri
+      this.dialogFormVisible = false
+      this.image_set = true
+    },
+    selectDraft(id) {
+      var did = id
+      // 传id去后端获取数据
+      get('/api/article/getDraft', { did }).then(res => {
+        var article = res.data
+        this.postForm.id = id
+        this.postForm.content = article.content
+        this.postForm.title = article.title
+        this.postForm.region = article.region
+        this.postForm.tags = article.tags
+      })
+    },
+    updateDrafts() {
+      var listQuery = {}
+      listQuery.nickname = this.name
+      console.log(this.name)
+      get('/api/article/getDrafts', listQuery).then(res => {
+        console.log(res)
+        this.drafts = res.data
+      })
+    },
+    updatePubs() {
+      var listQuery = {}
+      listQuery.nickname = this.name
+      console.log(this.name)
+      get('/api/article/getPubs', listQuery).then(res => {
+        console.log(res)
+        this.publicians = res.data
+      })
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped >
 @import "~@/styles/mixin.scss";
+
+.title-wrapper{
+  padding: 40px 25% 20px 30%;
+}
+
+.icon{
+  margin-left:-2%;margin-top:12%;font-size:30px;color:#609889;font-weight:bold
+}
+.icon:hover{
+  color:#46777d
+}
 
 .createPost-container {
   position: relative;
+
+  .cover-container{
+    width:100%;
+    height:600px;
+  }
 
   .createPost-main-container {
     padding: 40px 45px 20px 50px;
@@ -285,5 +409,6 @@ export default {
     border-radius: 0px;
     border-bottom: 1px solid #bfcbd9;
   }
+
 }
 </style>

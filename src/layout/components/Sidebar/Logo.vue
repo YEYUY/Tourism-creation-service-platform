@@ -24,8 +24,8 @@ export default {
   },
   data() {
     return {
-      title: 'Vue Element Admin',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      title: '逍遥游游记创作平台',
+      logo: 'https://tse1-mm.cn.bing.net/th/id/OIP-C.BVEJXKMCcrFOj2S_61Hj_QHaEU?w=294&h=180&c=7&r=0&o=5&dpr=1.4&pid=1.7'
     }
   }
 }
@@ -44,9 +44,9 @@ export default {
 .sidebar-logo-container {
   position: relative;
   width: 100%;
-  height: 50px;
-  line-height: 50px;
-  background: #2b2f3a;
+  height: 60px;
+  line-height: 60px;
+  background: #72d83f;
   text-align: center;
   overflow: hidden;
 
@@ -59,15 +59,16 @@ export default {
       height: 32px;
       vertical-align: middle;
       margin-right: 12px;
+      border-radius: 50%;
     }
 
     & .sidebar-title {
       display: inline-block;
       margin: 0;
-      color: #fff;
+      color: white;
       font-weight: 600;
       line-height: 50px;
-      font-size: 14px;
+      font-size: 16px;
       font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
       vertical-align: middle;
     }

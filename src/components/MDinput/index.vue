@@ -2,7 +2,7 @@
   <div :class="computedClasses" class="material-input__component">
     <div :class="{iconClass:icon}">
       <i v-if="icon" :class="['el-icon-' + icon]" class="el-input__icon material-input__icon" />
-      <input
+      <!-- <input
         v-if="type === 'email'"
         v-model="currentValue"
         :name="name"
@@ -83,7 +83,7 @@
         @focus="handleMdFocus"
         @blur="handleMdBlur"
         @input="handleModelInput"
-      >
+      > -->
       <input
         v-if="type === 'text'"
         v-model="currentValue"
@@ -101,8 +101,9 @@
         @blur="handleMdBlur"
         @input="handleModelInput"
       >
-      <span class="material-input-bar" />
-      <label class="material-label">
+
+      <label v-if="this.focus" class="material-label">
+        <!-- 插槽 填充内容的位置 -->
         <slot />
       </label>
     </div>
@@ -148,7 +149,7 @@ export default {
     return {
       currentValue: this.value,
       focus: false,
-      fillPlaceHolder: null
+      fillPlaceHolder: "请输入标题"
     }
   },
   computed: {
@@ -229,9 +230,10 @@ export default {
 
   // Mixins:
   @mixin slided-top() {
-    top: - ($font-size-base + $spacer);
+    top: -50px;
     left: 0;
-    font-size: $font-size-base;
+    color:#2f8375;
+    font-size: 25px;
     font-weight: $font-weight-bold;
   }
 
@@ -255,53 +257,53 @@ export default {
         font-weight: $font-weight-normal;
         pointer-events: none;
       }
-      .material-label {
-        left: $index-has-icon;
-      }
+      // .material-label {
+      //   left: $index-has-icon;
+      // }
       .material-input {
         text-indent: $index-has-icon;
       }
     }
     .material-input {
-      font-size: $font-size-base;
-      padding: $spacer $spacer $spacer - $apixel * 10 $spacer / 2;
+      font-size: $font-size-small;
+      padding: $spacer $spacer $spacer $spacer;
       display: block;
       width: 100%;
-      border: none;
+      border: #ffd000 1px solid;
       line-height: 1;
       border-radius: 0;
+      font-weight: $font-weight-normal;
       &:focus {
         outline: none;
-        border: none;
-        border-bottom: 1px solid transparent; // fixes the height issue
+        border: #42b983 3px solid;
       }
     }
     .material-label {
-      font-weight: $font-weight-normal;
+      font-weight: $font-weight-bold;
       position: absolute;
       pointer-events: none;
-      left: $index;
+      padding: 5px $spacer;
       top: 0;
       transition: $transition;
-      font-size: $font-size-small;
+      font-size: 20px;
     }
-    .material-input-bar {
-      position: relative;
-      display: block;
-      width: 100%;
-      &:before {
-        @extend %base-bar-pseudo;
-        left: 50%;
-      }
-      &:after {
-        @extend %base-bar-pseudo;
-        right: 50%;
-      }
-    }
+    // .material-input-bar {
+    //   position: relative;
+    //   display: block;
+    //   width: 100%;
+    //   &:before {
+    //     @extend %base-bar-pseudo;
+    //     left: 50%;
+    //   }
+    //   &:after {
+    //     @extend %base-bar-pseudo;
+    //     right: 50%;
+    //   }
+    // }
     // Disabled state:
     &.material--disabled {
       .material-input {
-        border-bottom-style: dashed;
+        //border-bottom-style: dashed;
       }
     }
     // Raised state:
@@ -321,40 +323,40 @@ export default {
     }
   }
 
-  .material-input__component {
-    background: $color-white;
-    .material-input {
-      background: none;
-      color: $color-black;
-      text-indent: $index;
-      border-bottom: 1px solid $color-grey-light;
-    }
-    .material-label {
-      color: $color-grey;
-    }
-    .material-input-bar {
-      &:before,
-      &:after {
-        background: $color-blue;
-      }
-    }
-    // Active state:
-    &.material--active {
-      .material-label {
-        color: $color-blue;
-      }
-    }
-    // Errors:
-    &.material--has-errors {
-      &.material--active .material-label {
-        color: $color-red;
-      }
-      .material-input-bar {
-        &:before,
-        &:after {
-          background: transparent;
-        }
-      }
-    }
-  }
+  // .material-input__component {
+  //   background: $color-white;
+  //   .material-input {
+  //     background: none;
+  //     color: $color-black;
+  //     text-indent: $index;
+  //     border-bottom: 1px solid $color-grey-light;
+  //   }
+  //   .material-label {
+  //     color: $color-grey;
+  //   }
+  //   .material-input-bar {
+  //     &:before,
+  //     &:after {
+  //       background: $color-blue;
+  //     }
+  //   }
+  //   // Active state:
+  //   &.material--active {
+  //     .material-label {
+  //       color: $color-blue;
+  //     }
+  //   }
+  //   // Errors:
+  //   &.material--has-errors {
+  //     &.material--active .material-label {
+  //       color: $color-red;
+  //     }
+  //     .material-input-bar {
+  //       &:before,
+  //       &:after {
+  //         background: transparent;
+  //       }
+  //     }
+  //   }
+  // }
 </style>

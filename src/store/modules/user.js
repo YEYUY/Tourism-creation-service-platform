@@ -1,5 +1,8 @@
+// 从api中获取登录，退出，获取身份三个方法
 import { login, logout, getInfo } from '@/api/user'
+// 从auth中获取设置，获取，删除token的方法
 import { getToken, setToken, removeToken } from '@/utils/auth'
+// 获取路由对象
 import router, { resetRouter } from '@/router'
 
 const state = {
@@ -7,7 +10,8 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  userId: 0
 }
 
 const mutations = {
@@ -25,19 +29,29 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_USERID: (state, userId) => {
+    state.userId = userId
   }
 }
 
 const actions = {
   // user login
-  login({ commit }, userInfo) {
+  login({ commit }, userInfo) { // userinfo是传过来的参数
     const { username, password } = userInfo
+
     return new Promise((resolve, reject) => {
+      // 调用api的login方法
       login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
-        resolve()
+        const { data, code } = response
+        if (code == 200) {
+          commit('SET_TOKEN', data)
+          const d = setToken(data)
+          const hasToken = getToken()
+          resolve()
+        } else {
+          reject('500')
+        }
       }).catch(error => {
         reject(error)
       })
@@ -47,28 +61,32 @@ const actions = {
   // get user info
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo(state.token).then(response => { // 调用getinfo从后端拿数据
         const { data } = response
-
+        console.log(data)
         if (!data) {
           reject('Verification failed, please Login again.')
         }
+        const roles = []
+        const { id, roleId, nickname, avatar, introduction } = data // 拿具体数据
+        console.log('🚀 ~ file: user.js:70 ~ getInfo ~  data:', data)
+        console.log('后端返回的信息')
 
-        const { roles, name, avatar, introduction } = data
-
-        // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
-          reject('getInfo: roles must be a non-null array!')
-        }
-
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
+        if (roleId == 0) { roles.push('admin') }
+        if (roleId == 1) { roles.push('editor') }
+        if (roleId == 2) { roles.push('user') }
+        commit('SET_USERID', id)
+        commit('SET_ROLES', roles) // 共享 身份 这一变量
+        commit('SET_NAME', nickname)
+        console.log('后端返回的nickname' + nickname)
         commit('SET_AVATAR', avatar)
         commit('SET_INTRODUCTION', introduction)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
+        data['roles'] = roles // 不容易 我靠   permission.js里需要解析data中的roles
+        resolve(data) // 就是返回值
       })
+      // }).catch(error => {
+      //   reject(error)
+      // })
     })
   },
 

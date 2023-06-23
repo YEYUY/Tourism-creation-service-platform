@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Vue Element Admin',
+  title: '逍遥游游记创作平台',
 
   /**
    * @type {boolean} true | false

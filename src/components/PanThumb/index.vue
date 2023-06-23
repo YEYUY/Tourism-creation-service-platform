@@ -58,8 +58,8 @@ export default {
   border-radius: 50%;
   overflow: hidden;
   position: absolute;
-  transform-origin: 95% 40%;
-  transition: all 0.3s ease-in-out;
+  transform-origin: 95% 30%;  /*x轴偏移  y轴偏移*/
+  transition: all 0.4s ease-in-out;
 }
 
 /* .pan-thumb:after {

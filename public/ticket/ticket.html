@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>机票查询</title>
+  <a href="http://localhost:9527/#/home">
+    <button class="button" style="vertical-align:middle"><span>返回首页</span></button>
+  </a>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body background="https://k1img.06dn.com/y/60/2023/05/06/60_64560b2d99c42.png"
+style="background-repeat:no-repeat;
+background-attachment:fixed;
+background-size:100% 100%; ">
+  <h1>机票查询</h1>
+  <form>
+    <label>出发城市：</label>
+    <input type="text" id="departure" required/>
+    <label>到达城市：</label>
+    <input type="text" id="arrival" required/>
+    <!--<label>航班号：</label>
+    <input type="text" id="flightNumber"/> -->
+    <label>出发日期：</label>
+    <input type="date" id="departuretime" required/>
+    <label>仓位类型：</label>
+    <select id="cabin">
+      <option value="economy">经济舱</option>
+      <option value="business">商务舱</option>
+      <option value="first">头等舱</option>
+    </select>
+    <button type="submit">查询</button>
+  </form>
+  <br>
+  <table id="flightTable" border="1">
+    <thead>
+      <tr>
+        <th>航班号</th>
+        <th>出发城市</th>
+        <th>到达城市</th>
+        <th>出发日期</th>
+        <th>仓位类型</th>
+        <th>价格</th>
+      </tr>
+    </thead>
+    <tbody id="flightTableBody">
+    </tbody>
+  </table>
+
+  
+  <script type="text/javascript">
+const form = document.querySelector('form');
+const tableBody = document.querySelector('#flightTableBody');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  
+  const departure = document.querySelector('#departure').value;
+  const arrival = document.querySelector('#arrival').value;
+  const departuretime = document.querySelector('#departuretime').value;
+  const cabin = document.querySelector('#cabin').value;
+  
+  let response;
+  try {
+    response = await fetch('http://127.0.0.1:8090/api/ticket/queryTicket', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ departure,arrival,departuretime,cabin })
+    });
+  } catch (error) {
+    console.error('Fetch Error:', error);
+  }
+
+  if (response) {
+    var data = await response.json();
+    data = data.data;
+    tableBody.innerHTML = '';
+    console.log(data);
+    data.data.forEach(flight => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${flight.flightnumber}</td>
+        <td>${flight.departure}</td>
+        <td>${flight.arrival}</td>
+        <td>${flight.departuretime}</td>
+        <td>${flight.cabin}</td>
+        <td>${flight.price}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+});
+
+</script>
+
+</body>
+</html>

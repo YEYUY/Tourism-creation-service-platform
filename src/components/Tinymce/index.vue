@@ -1,5 +1,5 @@
 <template>
-  <div :class="{fullscreen:fullscreen}" class="tinymce-container" :style="{width:containerWidth}">
+  <div :class="{fullscreen:fullscreen}" class="tinymce-container" :style="{width:containerWidth}" style="justify-content:center;align-items:center">
     <textarea :id="tinymceId" class="tinymce-textarea" />
     <div class="editor-custom-btn-container">
       <editorImage color="#1890ff" class="editor-upload-btn" @successCBK="imageSuccessCBK" />
@@ -30,18 +30,18 @@ export default {
         return 'vue-tinymce-' + +new Date() + ((Math.random() * 1000).toFixed(0) + '')
       }
     },
-    value: {
+    value: { // 内容
       type: String,
       default: ''
     },
-    toolbar: {
+    toolbar: { // 工具栏
       type: Array,
       required: false,
       default() {
         return []
       }
     },
-    menubar: {
+    menubar: { // 选项
       type: String,
       default: 'file edit insert view format table'
     },
@@ -60,9 +60,9 @@ export default {
     return {
       hasChange: false,
       hasInit: false,
-      tinymceId: this.id,
+      tinymceId: this.id, // 富文本的id
       fullscreen: false,
-      languageTypeList: {
+      languageTypeList: { // 语言列表
         'en': 'en',
         'zh': 'zh_CN',
         'es': 'es_MX',
